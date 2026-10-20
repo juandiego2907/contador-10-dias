@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contador</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; color: #fff; }
+  body { display: flex; align-items: center; justify-content: center;
+         font-family: "Courier New", ui-monospace, monospace; }
+  #c { display: flex; gap: clamp(12px, 4vw, 48px); text-align: center; }
+  .n { font-size: clamp(40px, 12vw, 140px); font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+  .l { font-size: clamp(10px, 2vw, 16px); letter-spacing: .3em; opacity: .5; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div id="c">
+  <div><div class="n" id="d">10</div><div class="l">DÍAS</div></div>
+  <div><div class="n" id="h">00</div><div class="l">HORAS</div></div>
+  <div><div class="n" id="m">00</div><div class="l">MIN</div></div>
+  <div><div class="n" id="s">00</div><div class="l">SEG</div></div>
+</div>
+<script>
+  // Fin fijo: 10 días desde que se subió la página. Corre aunque nadie la tenga abierta.
+  var FIN = 1793348585000;
+  var p = function (x) { return String(x).padStart(2, "0"); };
+  function tick() {
+    var r = Math.max(0, Math.floor((FIN - Date.now()) / 1000));
+    document.getElementById("d").textContent = p(Math.floor(r / 86400));
+    document.getElementById("h").textContent = p(Math.floor(r % 86400 / 3600));
+    document.getElementById("m").textContent = p(Math.floor(r % 3600 / 60));
+    document.getElementById("s").textContent = p(r % 60);
+  }
+  tick(); setInterval(tick, 1000);
+</script>
+</body>
+</html>
