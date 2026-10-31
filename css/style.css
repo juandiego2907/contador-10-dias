@@ -299,8 +299,8 @@ button { font: inherit; color: inherit; }
 .chapter--song .chapter__inner { max-width: 460px; }
 .cover {
   position: relative;
-  width: min(72vw, 340px, 42svh);
-  aspect-ratio: 1;
+  width: min(64vw, 300px, 32svh);   /* the cover is a 3:4 painting, shown whole */
+  aspect-ratio: 3 / 4;
   margin: 0 0 clamp(28px, 5vh, 44px);
   background: linear-gradient(160deg, #1a1916, #0a0a0a);
   box-shadow: 0 50px 100px -40px rgba(0, 0, 0, 1), 0 0 0 1px var(--line);
@@ -328,6 +328,7 @@ button { font: inherit; color: inherit; }
 .player__bar { flex: 1; text-align: left; }
 .player__times { display: flex; justify-content: space-between; margin-top: 6px; }
 .fin { margin: clamp(36px, 7vh, 64px) 0 0; font: italic 300 15px/1 var(--serif); letter-spacing: .5em; color: var(--faint); }
+@media (max-height: 600px) { .fin { display: none; } .chapter--song .whisper:empty { display: none; } }
 
 /* ---------- admin ---------- */
 .admin { position: fixed; right: 12px; bottom: 12px; z-index: 70; max-width: calc(100vw - 24px); font: 400 13px/1.4 var(--sans); }

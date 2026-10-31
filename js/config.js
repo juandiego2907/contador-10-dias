@@ -19,7 +19,7 @@ export const CONFIG = {
     vlog: "assets/media/vlog.mp4",
     vlogPoster: "",                       // optional still frame, e.g. "assets/media/vlog-poster.jpg"
     song: "assets/media/song.mp3",
-    cover: "assets/media/cover.svg",
+    cover: "assets/media/cover.jpg",
   },
 
   song: {

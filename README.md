@@ -20,7 +20,7 @@ finds the URL, no matter what the page does. For a personal vlog, upload it to t
 (see below). The page then streams it through short-lived signed links that only a valid, unused viewer link can get.
 
 Prefer `.mp4` (H.264 + AAC) for the vlog: it plays everywhere, including iPhone. `.mp3` or `.m4a` for the song,
-`.jpg` square for the cover (1200×1200 is plenty).
+`.jpg` for the cover. The cover frame is 3:4 (portrait) to fit the painting; change `aspect-ratio` on `.cover` in `css/style.css` for another shape.
 
 ## Access modes
 
