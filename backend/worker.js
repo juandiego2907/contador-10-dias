@@ -15,8 +15,8 @@
 
 const ADMIN_TTL = 12 * 3600;      // seconds an admin session lasts
 const MEDIA_TTL = 4 * 3600;       // seconds a signed media link lasts
-const KINDS = ["vlog", "song", "cover"];
-const DEFAULT_KEYS = { vlog: "vlog.mp4", song: "song.mp3", cover: "cover.jpg" };
+const KINDS = ["vlog", "song", "cover", "lyrics"];
+const DEFAULT_KEYS = { vlog: "vlog.mp4", song: "song.mp3", cover: "cover.jpg", lyrics: "lyrics.txt" };
 
 export default {
   async fetch(request, env) {
@@ -26,7 +26,7 @@ export default {
 
     try {
       const path = url.pathname.replace(/^\/api/, "");
-      if (request.method === "GET" && path.startsWith("/media/")) return await serveMedia(request, env, url);
+      if (request.method === "GET" && path.startsWith("/media/")) return await serveMedia(request, env, url, cors);
       if (request.method !== "POST") return json({ error: "not_found" }, 404, cors);
 
       const body = await request.json().catch(() => ({}));
@@ -164,7 +164,7 @@ async function signedMediaUrl(env, url, kind) {
   return `${url.origin}/api/media/${kind}?exp=${exp}&sig=${sig}`;
 }
 
-async function serveMedia(request, env, url) {
+async function serveMedia(request, env, url, cors) {
   const kind = url.pathname.split("/").pop();
   const exp = Number(url.searchParams.get("exp"));
   const sig = url.searchParams.get("sig") || "";
@@ -175,7 +175,7 @@ async function serveMedia(request, env, url) {
   const obj = await env.MEDIA.get(keys[kind], { range: request.headers });
   if (!obj) return new Response("Not found", { status: 404 });
 
-  const headers = new Headers();
+  const headers = new Headers(cors);   // lyrics are read with fetch(), which needs CORS
   obj.writeHttpMetadata(headers);
   headers.set("accept-ranges", "bytes");
   headers.set("cache-control", "private, max-age=3600");

@@ -30,13 +30,17 @@ if (!token && !api.secure && !wantsAdmin) token = "public-viewer-local-0001";
 let mode = wantsAdmin ? "admin" : token ? "viewer" : "public";
 
 // ---- chapter mechanics ------------------------------------------------------
+// A chapter is "in" when it fills at least a third of the screen. Measured against the
+// viewport, not the chapter, so a tall chapter (the song with its lyrics open) still counts.
 const seen = new IntersectionObserver((entries) => {
   for (const e of entries) {
-    e.target.classList.toggle("is-in", e.isIntersecting);
-    if (!e.isIntersecting && e.target === chapters.vlog) vlog.pause();    // leaving the film pauses it
-    if (!e.isIntersecting && e.target === chapters.song) song.pause();
+    const inView = e.isIntersecting &&
+      e.intersectionRect.height >= Math.min(e.boundingClientRect.height, innerHeight) * 0.35;
+    e.target.classList.toggle("is-in", inView);
+    if (!inView && e.target === chapters.vlog) vlog.pause();    // leaving the film pauses it
+    if (!inView && e.target === chapters.song) song.pause();
   }
-}, { threshold: 0.35 });
+}, { threshold: [0, 0.05, 0.1, 0.2, 0.35, 0.5, 0.75, 1] });
 Object.values(chapters).forEach((c) => seen.observe(c));
 
 function unlock(name) {
@@ -101,14 +105,15 @@ async function loadVlog() {
 }
 
 async function loadSong() {
-  const [a, c] = await Promise.all([mediaUrl("song"), mediaUrl("cover")]);
+  const [a, c, l] = await Promise.all([mediaUrl("song"), mediaUrl("cover"), mediaUrl("lyrics")]);
   if (!a || a === "consumed") song.unavailable("The song isn't available right now.");
   else song.load(a, c && c !== "consumed" ? c : CONFIG.media.cover);
+  if (l && l !== "consumed") song.loadLyrics(l);
 }
 
 function showCompleted() {
   $("screen").hidden = true;
-  $("vlog-done").hidden = false;
+  $("vlog-done").hidden = false; $("vlog-note").hidden = true;
   vlog.pause();
   unlock("song");
   loadSong();
@@ -121,7 +126,7 @@ async function finishVlog() {
       try { await api.complete(token); break; } catch (e) { if (e.status && e.status < 500) break; await wait(1500 * (i + 1)); }
     }
     $("screen").hidden = true;
-    $("vlog-done").hidden = false;
+    $("vlog-done").hidden = false; $("vlog-note").hidden = true;
   }
   await loadSong();
   await wait(reducedMotion() ? 200 : 1200);
@@ -200,7 +205,7 @@ if (mode === "admin") {
     onCancel() { mode = "public"; history.replaceState(null, "", location.pathname); if (Date.now() >= CONFIG.UNLOCK_AT) onCountdownEnd(false); },
     async onReady() {
       unlock("vlog"); unlock("song");
-      $("screen").hidden = false; $("vlog-done").hidden = true;
+      $("screen").hidden = false; $("vlog-done").hidden = true; $("vlog-note").hidden = false;
       await Promise.all([loadVlog(), loadSong()]);
     },
     go: (name) => chapters[name].scrollIntoView({ behavior: reducedMotion() ? "instant" : "smooth" }),

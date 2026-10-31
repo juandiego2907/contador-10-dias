@@ -38,7 +38,37 @@ export function createSong({ title, artist }) {
   img.addEventListener("load", () => cover.classList.add("has-img"));
   img.addEventListener("error", () => cover.classList.remove("has-img"));   // falls back to the placeholder
 
+  // Lyrics: plain text, verses separated by a blank line. Hidden until asked for.
+  const lyricsBtn = $("lyrics-toggle"), lyricsBox = $("lyrics");
+  lyricsBtn.addEventListener("click", () => {
+    const open = lyricsBox.hidden;
+    lyricsBox.hidden = !open;
+    lyricsBtn.setAttribute("aria-expanded", String(open));
+    lyricsBtn.textContent = open ? "Hide lyrics" : "Lyrics";
+    if (open) requestAnimationFrame(() => lyricsBox.classList.add("is-open"));
+    else lyricsBox.classList.remove("is-open");
+  });
+
+  function showLyrics(text) {
+    const verses = text.replace(/\r/g, "").trim().split(/\n\s*\n/);
+    lyricsBox.replaceChildren(...verses.map((v) => {
+      const p = document.createElement("p");
+      const lines = v.split("\n").map((l) => l.trim());
+      if (/^(ready\?|baby)$/i.test(lines[0])) p.className = "chorus";
+      lines.forEach((l, i) => { if (i) p.append(document.createElement("br")); p.append(l); });
+      return p;
+    }));
+    lyricsBtn.hidden = false;
+  }
+
   return {
+    async loadLyrics(url) {
+      if (!url) return;
+      try {
+        const res = await fetch(url);
+        if (res.ok) showLyrics(await res.text());
+      } catch { /* no lyrics: the button simply stays hidden */ }
+    },
     load(audioUrl, coverUrl) {
       if (audioUrl && audioUrl !== src) { src = audioUrl; audio.src = audioUrl; status.textContent = ""; }
       if (coverUrl) img.src = coverUrl;

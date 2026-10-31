@@ -10,7 +10,7 @@ ALLOWED_ORIGINS = "https://juandiego2907.github.io,https://contador-10-dias.verc
 # Viewer must spend at least this long between pressing play and the end.
 # Vlog is 1032 s; at 2x that is 516 s, so 460 leaves a margin.
 MIN_WATCH_SECONDS = "460"
-MEDIA_KEYS = '{"vlog":"vlog.mp4","song":"song.mp3","cover":"cover.jpg"}'
+MEDIA_KEYS = '{"vlog":"vlog.mp4","song":"song.mp3","cover":"cover.jpg","lyrics":"lyrics.txt"}'
 
 [[kv_namespaces]]
 binding = "TOKENS"
