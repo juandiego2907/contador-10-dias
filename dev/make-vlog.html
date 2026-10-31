@@ -1,0 +1,38 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Make placeholder vlog</title>
+<body style="background:#000;color:#ccc;font:14px sans-serif">
+<canvas id="c" width="1280" height="720" style="width:640px"></canvas>
+<p id="s">Recording…</p>
+<script>
+// Records a 12 s placeholder (with a soft tone) and saves it as assets/media/vlog.webm
+// through the dev server. Open http://localhost:8787/dev/make-vlog.html and click once.
+const c = document.getElementById("c"), x = c.getContext("2d"), SECS = 12;
+document.body.onclick = async () => {
+  const ac = new AudioContext(), dest = ac.createMediaStreamDestination();
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.frequency.value = 220; g.gain.value = 0.04; o.connect(g).connect(dest); o.start();
+  const stream = new MediaStream([...c.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
+  const rec = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp8,opus", videoBitsPerSecond: 1_500_000 });
+  const parts = []; rec.ondataavailable = (e) => parts.push(e.data);
+  rec.onstop = async () => {
+    const r = await fetch("/__save/vlog.webm", { method: "PUT", body: new Blob(parts, { type: "video/webm" }) });
+    document.getElementById("s").textContent = await r.text();
+  };
+  const t0 = performance.now(); rec.start();
+  (function frame() {
+    const t = (performance.now() - t0) / 1000;
+    x.fillStyle = "#070707"; x.fillRect(0, 0, 1280, 720);
+    const g2 = x.createRadialGradient(640, 330, 0, 640, 330, 520);
+    g2.addColorStop(0, `rgba(255,220,180,${0.08 + 0.04 * Math.sin(t)})`); g2.addColorStop(1, "transparent");
+    x.fillStyle = g2; x.fillRect(0, 0, 1280, 720);
+    x.fillStyle = "#f2ebdf"; x.textAlign = "center";
+    x.font = "italic 300 64px Georgia, serif"; x.fillText("your vlog goes here", 640, 340);
+    x.font = "20px sans-serif"; x.fillStyle = "#8b867e";
+    x.fillText(`PLACEHOLDER · ${Math.max(0, SECS - t).toFixed(1)} s`, 640, 400);
+    if (t < SECS) requestAnimationFrame(frame); else { rec.stop(); o.stop(); }
+  })();
+  document.body.onclick = null;
+};
+document.getElementById("s").textContent = "Click anywhere to record the placeholder.";
+</script>

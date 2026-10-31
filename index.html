@@ -2,38 +2,163 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Contador</title>
-<style>
-  html, body { margin: 0; height: 100%; background: #000; color: #fff; }
-  body { display: flex; align-items: center; justify-content: center; flex-direction: column;
-         font-family: "Courier New", ui-monospace, monospace; }
-  #c { display: flex; gap: clamp(12px, 4vw, 48px); text-align: center; }
-  .n { font-size: clamp(40px, 12vw, 140px); font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
-  #msg { text-align: center; margin: clamp(28px, 6vw, 56px) 0 0; padding: 0 16px; font-size: clamp(14px, 3vw, 24px); letter-spacing: .1em; opacity: .75; font-style: italic; }
-  .l { font-size: clamp(10px, 2vw, 16px); letter-spacing: .3em; opacity: .5; margin-top: 8px; }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="robots" content="noindex">
+<title>One Last Time</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<script type="module" src="js/main.js"></script>
 </head>
 <body>
-<div id="c">
-  <div><div class="n" id="d">10</div><div class="l">DAYS</div></div>
-  <div><div class="n" id="h">00</div><div class="l">HOURS</div></div>
-  <div><div class="n" id="m">00</div><div class="l">MINUTES</div></div>
-  <div><div class="n" id="s">00</div><div class="l">SECONDS</div></div>
-</div>
-<p id="msg">just believe one last time...</p>
-<script>
-  // Fin fijo: 10 días desde que se subió la página. Corre aunque nadie la tenga abierta.
-  var FIN = 1793419511000;
-  var p = function (x) { return String(x).padStart(2, "0"); };
-  function tick() {
-    var r = Math.max(0, Math.floor((FIN - Date.now()) / 1000));
-    document.getElementById("d").textContent = p(Math.floor(r / 86400));
-    document.getElementById("h").textContent = p(Math.floor(r % 86400 / 3600));
-    document.getElementById("m").textContent = p(Math.floor(r % 3600 / 60));
-    document.getElementById("s").textContent = p(r % 60);
-  }
-  tick(); setInterval(tick, 1000);
-</script>
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+<div class="curtain" id="curtain" aria-hidden="true"></div>
+
+<main id="film">
+
+  <!-- CHAPTER I — THE INTRO -->
+  <section class="chapter chapter--intro" id="intro" aria-label="Intro">
+    <div class="chapter__inner">
+      <div id="c" class="countdown" role="timer" aria-label="Time remaining">
+        <div><div class="n" id="d">10</div><div class="l">DAYS</div></div>
+        <div><div class="n" id="h">00</div><div class="l">HOURS</div></div>
+        <div><div class="n" id="m">00</div><div class="l">MINUTES</div></div>
+        <div><div class="n" id="s">00</div><div class="l">SECONDS</div></div>
+      </div>
+      <!-- Film leader: 5…1 shown when the page is opened after the countdown ended -->
+      <div class="leader" id="leader" hidden role="timer" aria-live="assertive">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <circle cx="100" cy="100" r="92"/>
+          <circle cx="100" cy="100" r="74"/>
+          <line x1="100" y1="0" x2="100" y2="200"/>
+          <line x1="0" y1="100" x2="200" y2="100"/>
+        </svg>
+        <div class="leader__sweep" aria-hidden="true"></div>
+        <span class="leader__n" id="leader-n">5</span>
+      </div>
+      <p id="msg">Just believe one last time…</p>
+      <p class="whisper" id="intro-status" aria-live="polite"></p>
+    </div>
+    <button class="next-cue" id="intro-next" type="button" hidden aria-label="Continue to the vlog">
+      <span></span>
+    </button>
+  </section>
+
+  <!-- CHAPTER II — THE VLOG -->
+  <section class="chapter chapter--vlog" id="vlog" aria-label="The vlog" hidden>
+    <div class="chapter__inner">
+      <header class="chapter__head">
+        <p class="eyebrow">Chapter II</p>
+        <h2 class="title">The Vlog</h2>
+      </header>
+
+      <div class="screen" id="screen">
+        <video id="video" playsinline preload="metadata"></video>
+        <button class="big-play" id="big-play" type="button" aria-label="Play the vlog">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>
+        </button>
+        <p class="screen__msg" id="screen-msg" role="status" hidden></p>
+        <div class="controls" id="controls">
+          <button class="ctl" id="v-toggle" type="button" aria-label="Play">
+            <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>
+            <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+          </button>
+          <div class="track" id="v-track">
+            <div class="track__fill" id="v-fill"></div>
+            <input class="track__input" id="v-seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Seek">
+          </div>
+          <span class="time" id="v-time">0:00</span>
+          <div class="speed" role="group" aria-label="Playback speed">
+            <button type="button" data-rate="1" aria-pressed="true">1×</button>
+            <button type="button" data-rate="2" aria-pressed="false">2×</button>
+          </div>
+          <button class="ctl" id="v-full" type="button" aria-label="Full screen">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="done" id="vlog-done" hidden>
+        <p class="eyebrow">Already watched</p>
+        <h3 class="done__title">Some moments only happen once.</h3>
+        <p class="done__text">You already saw this one. It stays with you now.</p>
+        <button class="link-btn" id="to-song" type="button">Continue to the song</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAPTER III — THE SONG -->
+  <section class="chapter chapter--song" id="song" aria-label="The song" hidden>
+    <div class="chapter__inner">
+      <figure class="cover" id="cover">
+        <img id="cover-img" alt="" decoding="async">
+        <figcaption class="cover__fallback" aria-hidden="true">OLT</figcaption>
+      </figure>
+      <p class="eyebrow">Chapter III</p>
+      <h2 class="title title--song" id="song-title">(Ready?)</h2>
+      <p class="artist" id="song-artist" hidden></p>
+
+      <div class="player" id="player">
+        <audio id="audio" preload="metadata"></audio>
+        <button class="play-btn" id="a-toggle" type="button" aria-label="Play the song">
+          <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>
+          <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+        </button>
+        <div class="player__bar">
+          <div class="track">
+            <div class="track__fill" id="a-fill"></div>
+            <input class="track__input" id="a-seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Song position">
+          </div>
+          <div class="player__times"><span id="a-cur">0:00</span><span id="a-dur">–:––</span></div>
+        </div>
+      </div>
+      <p class="whisper" id="song-status" role="status"></p>
+      <p class="fin" aria-hidden="true">fin</p>
+    </div>
+  </section>
+</main>
+
+<!-- ADMIN (only with #admin) -->
+<dialog class="admin-login" id="admin-login" aria-labelledby="admin-login-title">
+  <form method="dialog" id="admin-login-form">
+    <h2 id="admin-login-title">Admin</h2>
+    <label for="admin-pass">Password</label>
+    <input id="admin-pass" name="password" type="password" autocomplete="current-password" required>
+    <p class="admin-err" id="admin-login-err" role="alert"></p>
+    <div class="admin-row">
+      <button type="button" id="admin-login-cancel" class="a-btn a-btn--ghost">Cancel</button>
+      <button type="submit" class="a-btn">Enter</button>
+    </div>
+  </form>
+</dialog>
+
+<aside class="admin" id="admin" hidden aria-label="Admin panel">
+  <button class="admin__tab" id="admin-tab" type="button" aria-expanded="false" aria-controls="admin-body">Admin</button>
+  <div class="admin__body" id="admin-body" hidden>
+    <p class="admin__mode" id="admin-mode"></p>
+    <h3>Preview</h3>
+    <div class="admin-row admin-row--wrap">
+      <button class="a-btn a-btn--ghost" type="button" data-go="intro">Intro</button>
+      <button class="a-btn a-btn--ghost" type="button" data-go="vlog">Vlog</button>
+      <button class="a-btn a-btn--ghost" type="button" data-go="song">Song</button>
+      <button class="a-btn a-btn--ghost" type="button" id="admin-sim">Play the countdown ending</button>
+    </div>
+    <p class="admin__hint">Previews never touch any viewer link. Seeking and replays are unlimited here.</p>
+    <h3>Viewer links</h3>
+    <form class="admin-row" id="admin-create">
+      <input id="admin-label" type="text" maxlength="60" placeholder="Label (who it's for)" aria-label="Label">
+      <button class="a-btn" type="submit">New link</button>
+    </form>
+    <ul class="admin__list" id="admin-list"></ul>
+    <p class="admin-err" id="admin-err" role="alert"></p>
+    <div class="admin-row">
+      <button class="a-btn a-btn--ghost" type="button" id="admin-refresh">Refresh</button>
+      <button class="a-btn a-btn--ghost" type="button" id="admin-logout">Log out</button>
+    </div>
+  </div>
+</aside>
 </body>
 </html>

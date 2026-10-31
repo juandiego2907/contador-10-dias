@@ -1,0 +1,9 @@
+dev/.data/
+dev/private-media/
+node_modules/
+.wrangler/
+fotos, videos y musica/
+# Real media goes to the private R2 bucket, never to the public repo
+assets/media/vlog.mp4
+assets/media/song.mp3
+ADMIN-PASSWORD.txt

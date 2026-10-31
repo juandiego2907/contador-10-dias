@@ -1,0 +1,17 @@
+<!doctype html>
+<!-- Dev-only harness: loads the real page with the clock shifted so the countdown
+     ends `?in=` seconds from now, matching a dev server started with UNLOCK_AT=<?unlock>.
+     Example: UNLOCK_AT=<ms> node dev/server.mjs  →  /dev/test.html?unlock=<ms>#t=<token> -->
+<meta charset="utf-8">
+<script type="module">
+  const { CONFIG } = await import("/js/config.js");
+  const serverUnlock = Number(new URLSearchParams(location.search).get("unlock"));
+  const shift = CONFIG.UNLOCK_AT - serverUnlock;
+  const realNow = Date.now.bind(Date);
+  Date.now = () => realNow() + shift;
+  const html = await (await fetch("/index.html")).text();
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  document.head.innerHTML = '<base href="/">' + doc.head.innerHTML.replace(/<script[^>]*main\.js[^>]*><\/script>/, "");
+  document.body.innerHTML = doc.body.innerHTML;
+  await import("/js/main.js");
+</script>

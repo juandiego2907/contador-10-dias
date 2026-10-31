@@ -1,0 +1,25 @@
+# ONE LAST TIME — Cloudflare Worker config. Deploy steps are in README.md.
+name = "one-last-time"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+# Countdown end (ms). Must equal CONFIG.UNLOCK_AT in js/config.js.
+UNLOCK_AT = "1793419511000"
+ALLOWED_ORIGINS = "https://juandiego2907.github.io"
+# Viewer must spend at least this long between pressing play and the end.
+# Vlog is 1032 s; at 2x that is 516 s, so 460 leaves a margin.
+MIN_WATCH_SECONDS = "460"
+MEDIA_KEYS = '{"vlog":"vlog.mp4","song":"song.mp3","cover":"cover.svg"}'
+
+[[kv_namespaces]]
+binding = "TOKENS"
+id = "9d1149f44bec4eb088d6bc89f55ef56c"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "one-last-time-media"
+
+# Secrets (never in this file):
+#   npx wrangler secret put ADMIN_PASSWORD
+#   npx wrangler secret put SIGNING_SECRET
